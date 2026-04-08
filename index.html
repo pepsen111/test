@@ -2,463 +2,817 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>🍕 Pizza Express · Симулятор доставки</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+  <title>🍕 PIZZA DELIVERY · ИНВЕНТАРЬ & АВТОРИЗАЦИЯ</title>
+  <!-- Шрифты -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
   <style>
     * {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
-      font-family: 'Segoe UI', 'Inter', system-ui, sans-serif;
     }
 
     body {
+      background: radial-gradient(circle at 20% 30%, #1a2637, #0b1018);
       min-height: 100vh;
-      background: linear-gradient(145deg, #fff7e6 0%, #feeac9 100%);
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 20px;
+      font-family: 'Inter', sans-serif;
+      padding: 1.5rem;
       margin: 0;
+      color: #ffffff;
     }
 
-    /* главная карточка */
+    /* Главный контейнер */
     .game-container {
-      max-width: 900px;
+      max-width: 1300px;
       width: 100%;
-      background: rgba(255, 255, 255, 0.7);
+      background: rgba(12, 20, 30, 0.7);
       backdrop-filter: blur(20px);
       -webkit-backdrop-filter: blur(20px);
-      border-radius: 48px;
-      box-shadow: 0 25px 40px -10px rgba(0, 0, 0, 0.2), 0 8px 20px rgba(206, 92, 0, 0.08);
-      padding: 28px 30px 35px;
-      border: 1px solid rgba(255, 215, 150, 0.5);
-      transition: transform 0.2s ease;
+      border: 1px solid rgba(255, 180, 60, 0.25);
+      border-radius: 3.5rem;
+      padding: 2rem 2rem 2.5rem;
+      box-shadow: 0 30px 45px -10px #000000b0, 0 0 0 1px #ffb0451a inset;
+      transition: box-shadow 0.3s;
     }
 
-    .game-container:hover {
-      transform: scale(1.002);
+    /* Секция авторизации (скрывается при входе) */
+    .auth-section {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 380px;
+      gap: 1.5rem;
     }
 
-    /* шапка с балансом */
-    .wallet-section {
+    .auth-card {
+      background: rgba(20, 32, 48, 0.8);
+      backdrop-filter: blur(12px);
+      border-radius: 3rem;
+      padding: 2.2rem 2.5rem;
+      width: 100%;
+      max-width: 420px;
+      border: 1px solid #f3b85e40;
+      box-shadow: 0 20px 30px -5px #00000080, inset 0 1px 0 #fff1;
+    }
+
+    .auth-title {
+      font-size: 2.3rem;
+      font-weight: 800;
+      text-align: center;
+      margin-bottom: 1.8rem;
+      background: linear-gradient(135deg, #ffeac2, #ffc97a);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      letter-spacing: -0.02em;
+    }
+
+    .input-group {
+      margin-bottom: 1.4rem;
+    }
+
+    .input-group label {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 0.4rem;
+      color: #cdddf7;
+      font-size: 0.95rem;
+      letter-spacing: 0.3px;
+    }
+
+    .input-group input {
+      width: 100%;
+      padding: 1rem 1.2rem;
+      background: #0e1924e0;
+      border: 1.5px solid #3f556b;
+      border-radius: 60px;
+      font-size: 1.1rem;
+      color: white;
+      font-weight: 500;
+      outline: none;
+      transition: all 0.2s;
+      box-shadow: inset 0 3px 8px #00000060;
+    }
+
+    .input-group input:focus {
+      border-color: #ffae3c;
+      box-shadow: 0 0 0 3px #ffae3c30, inset 0 2px 6px black;
+    }
+
+    .auth-buttons {
+      display: flex;
+      gap: 1rem;
+      margin-top: 2rem;
+    }
+
+    .auth-btn {
+      flex: 1;
+      background: linear-gradient(145deg, #2e4258, #1a293b);
+      border: none;
+      border-bottom: 5px solid #0f1a24;
+      border-radius: 60px;
+      padding: 0.9rem 0.5rem;
+      font-weight: 700;
+      font-size: 1.2rem;
+      color: #FFE1A8;
+      text-shadow: 0 2px 3px black;
+      cursor: pointer;
+      transition: 0.15s;
+      box-shadow: 0 6px 0 #0e1620, 0 8px 18px black;
+    }
+
+    .auth-btn:hover {
+      background: linear-gradient(145deg, #3a5670, #243a50);
+      transform: translateY(-2px);
+      border-bottom-width: 5px;
+      box-shadow: 0 8px 0 #0e1620, 0 12px 22px black;
+    }
+
+    .auth-btn:active {
+      transform: translateY(5px);
+      border-bottom-width: 2px;
+      box-shadow: 0 3px 0 #0e1620, 0 8px 18px black;
+    }
+
+    .error-message {
+      color: #ff9e8f;
+      font-weight: 500;
+      text-align: center;
+      min-height: 24px;
+      margin-top: 10px;
+    }
+
+    /* Основной интерфейс (скрыт до авторизации) */
+    .main-interface {
+      display: none;
+    }
+
+    .main-interface.active {
+      display: block;
+    }
+
+    /* Шапка с юзером и выходом */
+    .top-bar {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      background: #1e1e2a;
-      padding: 18px 28px;
-      border-radius: 120px;
-      margin-bottom: 30px;
-      box-shadow: 0 12px 0 #0b0b10, 0 8px 20px rgba(0,0,0,0.2);
-      border: 1px solid #ffb55a;
+      flex-wrap: wrap;
+      gap: 1rem;
+      margin-bottom: 2rem;
     }
 
-    .wallet-info {
+    .user-greeting {
       display: flex;
       align-items: center;
-      gap: 14px;
+      gap: 15px;
     }
 
-    .wallet-icon {
-      font-size: 36px;
-      filter: drop-shadow(0 4px 4px rgba(0,0,0,0.3));
+    .avatar {
+      background: #d99f3c;
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.8rem;
+      box-shadow: 0 4px 0 #7a4f1a, 0 6px 12px black;
+      border: 1px solid #ffd58c;
     }
 
-    .balance-display {
-      color: #ffd78c;
-      font-weight: 800;
-      font-size: 2.6rem;
-      letter-spacing: 1px;
-      text-shadow: 0 3px 0 #7a3e00;
+    .greeting-text {
+      font-weight: 700;
+      font-size: 1.5rem;
+      color: #ffdfaa;
     }
 
-    .balance-label {
-      color: #b9b9d6;
-      font-weight: 500;
+    .logout-btn {
+      background: #2d2620c0;
+      backdrop-filter: blur(8px);
+      border: 1px solid #b97f3a;
+      color: #ffeac2;
+      padding: 0.7rem 1.5rem;
+      border-radius: 40px;
+      font-weight: 700;
       font-size: 1rem;
-      margin-left: 6px;
+      cursor: pointer;
+      transition: 0.15s;
+      box-shadow: 0 4px 0 #3d2e1d;
+      display: flex;
+      align-items: center;
+      gap: 8px;
     }
 
-    /* кнопка дохода */
-    .earn-button {
-      background: radial-gradient(circle at 20% 20%, #ffb347, #ff8c00);
-      border: none;
-      color: #1e1e2a;
-      font-weight: 800;
-      font-size: 1.4rem;
-      padding: 14px 32px;
-      border-radius: 60px;
-      cursor: pointer;
-      box-shadow: 0 8px 0 #b45f00, 0 6px 16px rgba(255, 140, 0, 0.5);
-      border: 1px solid #ffe694;
+    .logout-btn:hover {
+      background: #42382e;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 0 #3d2e1d;
+    }
+
+    /* Кошелёк и баланс */
+    .wallet-panel {
+      background: #0f1a24cc;
+      backdrop-filter: blur(8px);
+      border-radius: 120px;
+      padding: 0.7rem 2rem;
+      border: 1px solid #f0b357;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin: 1rem 0 2rem;
+      box-shadow: 0 10px 0 #0a121c, 0 10px 25px black, inset 0 1px 0 #ffeecc;
+    }
+
+    .wallet-label {
+      font-weight: 700;
+      font-size: 1.5rem;
+      color: #eedbba;
       display: flex;
       align-items: center;
       gap: 12px;
-      transition: all 0.07s cubic-bezier(0.2, 1.6, 0.5, 1);
-      letter-spacing: 0.5px;
-      transform: translateY(0);
     }
 
-    .earn-button:active {
-      transform: translateY(5px);
-      box-shadow: 0 3px 0 #b45f00, 0 6px 16px rgba(255, 140, 0, 0.5);
+    .balance-display {
+      font-weight: 800;
+      font-size: 3.2rem;
+      color: #FFDD99;
+      text-shadow: 0 0 15px #f90, 0 2px 5px black;
+      transition: transform 0.2s;
     }
 
-    .earn-button:hover {
-      background: radial-gradient(circle at 30% 30%, #ffc470, #ff9f1a);
-      box-shadow: 0 8px 0 #b45f00, 0 10px 20px rgba(255, 140, 0, 0.6);
+    .balance-display.pop {
+      transform: scale(1.2);
+      color: #ffeaad;
     }
 
-    .earn-emoji {
-      font-size: 28px;
-      filter: drop-shadow(0 2px 2px black);
+    /* Кнопка +100 */
+    .quick-earn-wrap {
+      display: flex;
+      justify-content: center;
+      margin: 25px 0 20px;
     }
 
-    /* сетка пицц */
-    .pizza-menu {
-      margin: 30px 0 18px;
-    }
-
-    .section-title {
+    .earn-btn {
+      background: linear-gradient(145deg, #3b5d3e, #1f3a22);
+      border: none;
+      border-bottom: 8px solid #0e2410;
+      border-radius: 80px;
+      padding: 1.2rem 4rem;
+      font-weight: 800;
+      font-size: 2rem;
+      color: #d4ffb0;
+      text-shadow: 0 2px 5px #00000090;
+      box-shadow: 0 12px 20px -5px black, inset 0 1px 0 #b1ff9e;
+      cursor: pointer;
       display: flex;
       align-items: center;
-      gap: 10px;
-      margin-bottom: 18px;
-      color: #3d2a1a;
-      font-weight: 700;
+      gap: 18px;
+      transition: 0.15s;
+      letter-spacing: 2px;
+    }
+
+    .earn-btn:hover {
+      background: linear-gradient(145deg, #4e7a52, #2c4d2f);
+      border-bottom-width: 6px;
+      transform: translateY(2px);
+      box-shadow: 0 10px 18px black, inset 0 1px 0 #e0ffc0;
+    }
+
+    .earn-btn:active {
+      transform: translateY(7px);
+      border-bottom-width: 3px;
+    }
+
+    /* Сетка пицц + инвентарь (две колонки) */
+    .content-panels {
+      display: grid;
+      grid-template-columns: 1.5fr 1fr;
+      gap: 2rem;
+      margin: 2rem 0 1rem;
+    }
+
+    /* Пиццы */
+    .pizza-section h2, .inventory-section h2 {
       font-size: 1.8rem;
-      text-shadow: 2px 2px 0 #ffe0b3;
+      margin-bottom: 1.5rem;
+      color: #ffd58c;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      border-bottom: 2px dashed #b57c2e;
+      padding-bottom: 10px;
     }
 
     .pizza-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
-      gap: 16px;
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      gap: 1.2rem;
     }
 
-    /* карточка пиццы */
     .pizza-card {
-      background: white;
-      border-radius: 28px;
-      padding: 18px 10px 14px;
-      box-shadow: 0 12px 0 #a05f2c, 0 10px 20px -5px rgba(100, 50, 10, 0.2);
-      border: 1px solid #ffddbb;
+      background: #172433dd;
+      backdrop-filter: blur(10px);
+      border-radius: 2rem;
+      padding: 1.2rem 0.5rem 1rem;
+      border: 1px solid #ffbb4d40;
+      box-shadow: 0 15px 20px -8px black;
       display: flex;
       flex-direction: column;
       align-items: center;
-      text-align: center;
-      transition: all 0.25s ease;
-      cursor: pointer;
-      transform: translateY(0);
-      animation: card-float 4s infinite alternate ease-in-out;
-    }
-
-    /* разная задержка анимации для живости */
-    .pizza-card:nth-child(1) { animation-delay: 0s; }
-    .pizza-card:nth-child(2) { animation-delay: 0.4s; }
-    .pizza-card:nth-child(3) { animation-delay: 0.2s; }
-    .pizza-card:nth-child(4) { animation-delay: 0.6s; }
-    .pizza-card:nth-child(5) { animation-delay: 0.1s; }
-
-    @keyframes card-float {
-      0% { transform: translateY(0px); }
-      100% { transform: translateY(-6px); }
+      transition: all 0.25s;
     }
 
     .pizza-card:hover {
-      box-shadow: 0 8px 0 #a05f2c, 0 18px 28px -8px #cc7f3a;
-      transform: translateY(-2px) scale(1.02);
-      background: #fffbf5;
-      border-color: #ffb26e;
-      animation-play-state: paused;
-    }
-
-    .pizza-card:active {
-      transform: translateY(5px);
-      box-shadow: 0 4px 0 #7a421e, 0 10px 18px -5px #b45f2e;
+      transform: translateY(-8px);
+      background: #20344ae0;
+      border-color: #ffbb4d;
+      box-shadow: 0 22px 28px -10px black, 0 0 15px #ffbb4d30;
     }
 
     .pizza-emoji {
-      font-size: 64px;
-      margin-bottom: 8px;
-      filter: drop-shadow(0 8px 8px rgba(0,0,0,0.15));
-      transition: transform 0.2s;
-    }
-
-    .pizza-card:hover .pizza-emoji {
-      transform: rotate(3deg) scale(1.1);
+      font-size: 4.5rem;
+      filter: drop-shadow(0 8px 10px #00000080);
     }
 
     .pizza-name {
-      font-weight: 800;
-      font-size: 1.25rem;
-      color: #2d1c0c;
-      margin-bottom: 8px;
+      font-weight: 700;
+      font-size: 1.2rem;
+      margin: 0.3rem 0;
     }
 
     .pizza-price {
-      background: #4a3620;
-      padding: 6px 18px;
-      border-radius: 40px;
-      color: #ffe6b3;
-      font-weight: 700;
-      font-size: 1.2rem;
-      box-shadow: inset 0 2px 4px rgba(0,0,0,0.2), 0 3px 0 #1f150a;
-      border-bottom: 1px solid #aa7942;
-      margin: 6px 0 12px;
-    }
-
-    .buy-indicator {
-      font-size: 1rem;
-      background: #ffeedb;
-      padding: 5px 12px;
+      background: #1e2f40;
+      padding: 0.2rem 1rem;
       border-radius: 30px;
-      color: #5a3e25;
-      font-weight: 600;
-      width: fit-content;
-      margin: 0 auto;
-      border: 1px solid #efc48c;
-      transition: background 0.2s;
-    }
-
-    /* панель действий доставки */
-    .delivery-panel {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-top: 30px;
-      background: #ffe1b9;
-      border-radius: 60px;
-      padding: 8px 8px 8px 24px;
-      border: 2px dashed #c97f2e;
-    }
-
-    .delivery-message {
-      font-weight: 600;
-      color: #412d1a;
-      font-size: 1.1rem;
-      display: flex;
-      align-items: center;
-      gap: 10px;
+      font-weight: 700;
+      color: #ffcf7a;
+      border: 1px solid #e09e3e;
+      margin: 0.5rem 0;
+      font-size: 1.5rem;
     }
 
     .deliver-btn {
-      background: #c7512c;
+      background: #c75e1a;
       border: none;
-      color: white;
-      font-weight: 700;
-      font-size: 1.2rem;
-      padding: 14px 32px;
-      border-radius: 50px;
-      box-shadow: 0 6px 0 #732e18, 0 4px 12px rgba(190, 70, 20, 0.3);
+      border-bottom: 5px solid #833f0c;
+      border-radius: 40px;
+      padding: 0.6rem 1rem;
+      width: 100%;
+      font-weight: 800;
+      color: #ffefcf;
+      text-shadow: 0 1px 2px black;
       cursor: pointer;
+      transition: 0.1s;
+      margin-top: 5px;
+      font-size: 1rem;
+    }
+
+    .deliver-btn:hover {
+      background: #e06d24;
+      border-bottom-width: 4px;
+      transform: translateY(1px);
+    }
+
+    /* Инвентарь */
+    .inventory-section {
+      background: #0f1b26b0;
+      backdrop-filter: blur(10px);
+      border-radius: 2.5rem;
+      padding: 1.5rem 1.5rem;
+      border: 1px solid #ebae5a50;
+      box-shadow: inset 0 0 20px #00000060, 0 10px 20px #00000060;
+    }
+
+    .inventory-list {
+      max-height: 450px;
+      overflow-y: auto;
+      padding-right: 5px;
+    }
+
+    .inventory-item {
+      background: #1c2b3ccc;
+      border-radius: 40px;
+      padding: 0.8rem 1.2rem;
+      margin-bottom: 0.8rem;
       display: flex;
       align-items: center;
-      gap: 10px;
-      transition: 0.07s;
-      transform: translateY(0);
-      border: 1px solid #ffb28b;
+      gap: 15px;
+      border: 1px solid #f3b05360;
+      backdrop-filter: blur(4px);
+      box-shadow: 0 4px 0 #0e1820;
     }
 
-    .deliver-btn:active {
-      transform: translateY(4px);
-      box-shadow: 0 2px 0 #732e18, 0 4px 12px #a04020;
+    .inv-emoji {
+      font-size: 2.3rem;
     }
 
-    .deliver-btn:disabled {
-      opacity: 0.5;
-      transform: none;
-      box-shadow: 0 4px 0 #732e18;
-      pointer-events: none;
-      filter: grayscale(0.3);
+    .inv-details {
+      flex: 1;
+      font-weight: 600;
     }
 
-    /* уведомление (тост-анимация) */
-    .notification-toast {
+    .inv-name {
+      font-size: 1.2rem;
+      color: #ffe5be;
+    }
+
+    .inv-count {
+      font-weight: 400;
+      color: #b9c9e0;
+    }
+
+    .empty-inventory {
+      color: #9eb1cc;
+      text-align: center;
+      padding: 20px;
+      font-style: italic;
+    }
+
+    /* Уведомление */
+    .toast-message {
       position: fixed;
       bottom: 30px;
       left: 50%;
-      transform: translateX(-50%);
-      background: #1e1e2a;
-      color: #ffd966;
-      padding: 16px 32px;
+      transform: translateX(-50%) scale(0.9);
+      background: #1a293b;
+      backdrop-filter: blur(30px);
+      color: #FFE3A4;
+      padding: 1rem 2.5rem;
       border-radius: 60px;
       font-weight: 700;
-      font-size: 1.3rem;
+      font-size: 1.4rem;
+      border: 1px solid #f3bc6e;
       box-shadow: 0 20px 30px -5px black;
-      border-left: 8px solid #ffa726;
-      z-index: 999;
       opacity: 0;
-      transition: opacity 0.25s ease, transform 0.3s ease;
+      visibility: hidden;
+      transition: 0.2s;
       pointer-events: none;
-      white-space: nowrap;
+      z-index: 999;
     }
 
-    .notification-toast.show {
+    .toast-message.show {
       opacity: 1;
-      transform: translateX(-50%) translateY(-10px);
-      pointer-events: none;
+      visibility: visible;
+      transform: translateX(-50%) scale(1);
     }
 
-    .reset-area {
-      display: flex;
-      justify-content: flex-end;
-      margin-top: 10px;
-    }
-
-    .reset-link {
-      color: #8b5e2e;
-      font-weight: 500;
-      text-decoration: underline dotted;
-      cursor: pointer;
-      font-size: 0.9rem;
-      opacity: 0.7;
-    }
-
-    .reset-link:hover {
-      opacity: 1;
-    }
-
-    /* анимация смены цифр */
-    .balance-display {
-      transition: color 0.1s;
-    }
-
-    .glow-text {
-      text-shadow: 0 0 10px #ffb142;
+    @media (max-width: 800px) {
+      .content-panels { grid-template-columns: 1fr; }
+      .game-container { padding: 1.5rem; }
     }
   </style>
 </head>
 <body>
 <div class="game-container">
-  <!-- Верхняя панель: баланс + кнопка заработка -->
-  <div class="wallet-section">
-    <div class="wallet-info">
-      <span class="wallet-icon">👛</span>
-      <span class="balance-display" id="balanceValue">250</span>
-      <span class="balance-label">₽</span>
+  <!-- Блок авторизации -->
+  <div id="authSection" class="auth-section">
+    <div class="auth-card">
+      <div class="auth-title">🍕 PIZZA HUB</div>
+      <div class="input-group">
+        <label>👤 Логин</label>
+        <input type="text" id="loginInput" placeholder="Введите логин" autocomplete="off">
+      </div>
+      <div class="input-group">
+        <label>🔒 Пароль</label>
+        <input type="password" id="passwordInput" placeholder="••••••••" autocomplete="off">
+      </div>
+      <div id="authError" class="error-message"></div>
+      <div class="auth-buttons">
+        <button class="auth-btn" id="loginBtn">Войти</button>
+        <button class="auth-btn" id="registerBtn">Регистрация</button>
+      </div>
+      <p style="text-align: center; margin-top: 1.2rem; color: #b0bedb; font-size: 0.9rem;">Доставляй пиццу, копи инвентарь!</p>
     </div>
-    <button class="earn-button" id="earnBtn">
-      <span class="earn-emoji">🛵💨</span>
-      <span>+100</span>
-    </button>
   </div>
 
-  <!-- Меню из 5 пицц -->
-  <div class="pizza-menu">
-    <div class="section-title">
-      <span>🍕 МЕНЮ</span>
-      <span>⭐</span>
+  <!-- Основной интерфейс игры -->
+  <div id="mainInterface" class="main-interface">
+    <div class="top-bar">
+      <div class="user-greeting">
+        <div class="avatar">👨‍🍳</div>
+        <span class="greeting-text" id="usernameDisplay">Курьер</span>
+      </div>
+      <button class="logout-btn" id="logoutBtn">🚪 Выйти</button>
     </div>
-    <div class="pizza-grid" id="pizzaGrid"></div>
-  </div>
 
-  <!-- Блок доставки -->
-  <div class="delivery-panel">
-    <div class="delivery-message">
-      <span>📦</span>
-      <span id="deliveryStatus">Выберите пиццу</span>
+    <!-- Кошелёк -->
+    <div class="wallet-panel">
+      <span class="wallet-label"><span>💰</span> БАЛАНС</span>
+      <span class="balance-display" id="balanceDisplay">0</span>
     </div>
-    <button class="deliver-btn" id="deliverOrderBtn">
-      <span>🚚</span>
-      <span>Доставить</span>
-    </button>
-  </div>
 
-  <!-- скрытый сброс (опционально) -->
-  <div class="reset-area">
-    <span class="reset-link" id="resetGame">🔄 Сбросить прогресс</span>
+    <!-- Кнопка +100 -->
+    <div class="quick-earn-wrap">
+      <button class="earn-btn" id="quickEarnBtn">
+        <span>⚡</span> +100 <span>💵</span>
+      </button>
+    </div>
+
+    <!-- Пиццы и инвентарь -->
+    <div class="content-panels">
+      <div class="pizza-section">
+        <h2><span>🍕</span> МЕНЮ ДОСТАВКИ</h2>
+        <div class="pizza-grid" id="pizzaGrid"></div>
+      </div>
+      <div class="inventory-section">
+        <h2><span>📦</span> ИНВЕНТАРЬ</h2>
+        <div id="inventoryContainer" class="inventory-list">
+          <div class="empty-inventory">Пока пусто... доставь пиццу!</div>
+        </div>
+      </div>
+    </div>
+    <div style="margin-top: 20px; text-align: right; opacity: 0.8;">🛵 версия 2.0 · доставка + коллекция</div>
   </div>
 </div>
 
-<!-- Уведомление (всплывашка) -->
-<div class="notification-toast" id="notification"></div>
+<!-- Toast -->
+<div id="liveToast" class="toast-message">+0</div>
 
 <script>
   (function(){
     "use strict";
 
-    // ---------- СОСТОЯНИЕ ----------
-    const pizzas = [
-      { id: 0, name: 'Маргарита',   emoji: '🍕🧀', price: 120 },
-      { id: 1, name: 'с грибами',   emoji: '🍕🍄', price: 140 },
-      { id: 2, name: 'с ананасами', emoji: '🍕🍍', price: 150 },
-      { id: 3, name: 'Пепперони',   emoji: '🍕🌶️', price: 160 },
-      { id: 4, name: 'Четыре сыра', emoji: '🧀🧀🧀', price: 180 }
+    // ---------- КОНФИГУРАЦИЯ ПИЦЦ (дороже) ----------
+    const PIZZAS = [
+      { id: 'marg', name: 'Маргарита', emoji: '🍕🧀', price: 180, baseEmoji: '🍅' },
+      { id: 'mush', name: 'С грибами', emoji: '🍄🍕', price: 240, baseEmoji: '🍄' },
+      { id: 'pine', name: 'С ананасами', emoji: '🍍🍕', price: 300, baseEmoji: '🍍' },
+      { id: 'pep', name: 'Пепперони', emoji: '🍕🔥', price: 350, baseEmoji: '🌶️' },
+      { id: '4cheese', name: 'Четыре сыра', emoji: '🧀🧀', price: 420, baseEmoji: '🧀' }
     ];
 
-    // начальные данные
-    let balance = 250;                // стартовый баланс
-    let selectedPizzaId = null;       // id выбранной пиццы
-    let orderCount = 0;              // просто счетчик для анимаций
+    // ---------- СОСТОЯНИЕ ПРИЛОЖЕНИЯ ----------
+    let currentUser = null;               // { login, balance, inventory: { pizzaId: count } }
+    let usersDB = {};                    // хранилище в localStorage
 
     // DOM элементы
-    const balanceEl = document.getElementById('balanceValue');
+    const authSection = document.getElementById('authSection');
+    const mainInterface = document.getElementById('mainInterface');
+    const loginInput = document.getElementById('loginInput');
+    const passwordInput = document.getElementById('passwordInput');
+    const authError = document.getElementById('authError');
+    const loginBtn = document.getElementById('loginBtn');
+    const registerBtn = document.getElementById('registerBtn');
+    const logoutBtn = document.getElementById('logoutBtn');
+    const usernameDisplay = document.getElementById('usernameDisplay');
+    const balanceDisplay = document.getElementById('balanceDisplay');
+    const quickEarnBtn = document.getElementById('quickEarnBtn');
     const pizzaGrid = document.getElementById('pizzaGrid');
-    const deliveryStatus = document.getElementById('deliveryStatus');
-    const deliverBtn = document.getElementById('deliverOrderBtn');
-    const earnBtn = document.getElementById('earnBtn');
-    const notification = document.getElementById('notification');
-    const resetBtn = document.getElementById('resetGame');
+    const inventoryContainer = document.getElementById('inventoryContainer');
+    const toastEl = document.getElementById('liveToast');
 
-    // ---------- ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ----------
-    function formatBalance(value) {
-      return value.toString();
+    let toastTimeout = null;
+
+    // ---------- УТИЛИТЫ ----------
+    function showToast(msg, isGood = true) {
+      if (toastTimeout) clearTimeout(toastTimeout);
+      toastEl.textContent = msg;
+      toastEl.style.color = isGood ? '#FFE3A4' : '#ffa07a';
+      toastEl.classList.add('show');
+      toastTimeout = setTimeout(() => toastEl.classList.remove('show'), 1400);
     }
 
-    // Обновить отображение баланса с анимацией мерцания
-    function updateBalanceDisplay() {
-      balanceEl.textContent = formatBalance(balance);
-      // лёгкая вспышка
-      balanceEl.classList.add('glow-text');
-      setTimeout(() => balanceEl.classList.remove('glow-text'), 150);
+    function saveUsersDB() {
+      localStorage.setItem('pizzaDeliveryUsers', JSON.stringify(usersDB));
     }
 
-    // Показать всплывающее уведомление
-    function showToast(text, isGood = true) {
-      notification.textContent = text;
-      notification.style.background = isGood ? '#1e1e2a' : '#4a2020';
-      notification.style.borderLeftColor = isGood ? '#ffa726' : '#ff6b6b';
-      notification.classList.add('show');
-      setTimeout(() => {
-        notification.classList.remove('show');
-      }, 1800);
+    function loadUsersDB() {
+      const stored = localStorage.getItem('pizzaDeliveryUsers');
+      if (stored) {
+        try { usersDB = JSON.parse(stored); } catch(e){ usersDB = {}; }
+      } else {
+        usersDB = {};
+      }
     }
 
-    // Проверка, можно ли купить пиццу
-    function canAfford(pizzaPrice) {
-      return balance >= pizzaPrice;
+    // Сохранить данные текущего пользователя в БД
+    function persistCurrentUser() {
+      if (!currentUser) return;
+      usersDB[currentUser.login] = {
+        password: usersDB[currentUser.login]?.password || '', // пароль не трогаем
+        balance: currentUser.balance,
+        inventory: { ...currentUser.inventory }
+      };
+      saveUsersDB();
     }
 
-    // Обработчик покупки (выбор пиццы)
-    function handlePizzaClick(pizza) {
-      if (!canAfford(pizza.price)) {
-        showToast(`❌ Не хватает на "${pizza.name}"! Нужно ${pizza.price}₽`, false);
-        // анимация тряски? просто визуал
+    // Обновить интерфейс баланса
+    function updateBalanceUI() {
+      if (!currentUser) return;
+      balanceDisplay.textContent = currentUser.balance;
+      balanceDisplay.classList.add('pop');
+      setTimeout(() => balanceDisplay.classList.remove('pop'), 200);
+    }
+
+    // Рендер инвентаря
+    function renderInventory() {
+      if (!currentUser) return;
+      const inv = currentUser.inventory;
+      const entries = Object.entries(inv);
+      if (entries.length === 0) {
+        inventoryContainer.innerHTML = '<div class="empty-inventory">📭 Инвентарь пуст — доставь пиццу!</div>';
         return;
       }
-
-      // Списываем деньги
-      balance -= pizza.price;
-      selectedPizzaId = pizza.id;
-      orderCount++;
-
-      // Обновляем UI
-      updateBalanceDisplay();
-      updateDeliveryUI();
-      
-      // Анимация выбора: показываем тост
-      showToast(`✅ Выбрана: ${pizza.name} · -${pizza.price}₽`, true);
-
-      // перерисовываем карточки (чтобы обновить disabled-стиль если надо, хотя лучше просто ререндер)
-      renderPizzaCards();
-      
-      // доп. микроанимация на статус
-      deliveryStatus.style.transform = 'scale(1.05)';
-      setTimeout(() => deliveryStatus.style.transform = '', 120);
+      let html = '';
+      for (let [pizzaId, count] of entries) {
+        const pizza = PIZZAS.find(p => p.id === pizzaId);
+        if (!pizza) continue;
+        html += `
+          <div class="inventory-item">
+            <span class="inv-emoji">${pizza.emoji}</span>
+            <div class="inv-details">
+              <div class="inv-name">${pizza.name}</div>
+              <div class="inv-count">${count} шт.</div>
+            </div>
+          </div>
+        `;
+      }
+      inventoryContainer.innerHTML = html || '<div class="empty-inventory">🍕 Ничего нет</div>';
     }
 
-    // Обновить текст статуса и кнопку доставки
-    function updateDeliveryUI() {
-      if (selectedPizzaId !== null) {
-        const pizza = pizzas.find(p => p.id === selected
+    // Рендер карточек пицц
+    function renderPizzaCards() {
+      pizzaGrid.innerHTML = '';
+      PIZZAS.forEach(pizza => {
+        const card = document.createElement('div');
+        card.className = 'pizza-card';
+        card.innerHTML = `
+          <div class="pizza-emoji">${pizza.emoji}</div>
+          <div class="pizza-name">${pizza.name}</div>
+          <div class="pizza-price">${pizza.price} 🪙</div>
+          <button class="deliver-btn" data-id="${pizza.id}">🚚 Доставить</button>
+        `;
+        pizzaGrid.appendChild(card);
+      });
+      // Навесить обработчики
+      document.querySelectorAll('.deliver-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          const pizzaId = btn.dataset.id;
+          deliverPizza(pizzaId);
+        });
+      });
+    }
+
+    // Доставка пиццы
+    function deliverPizza(pizzaId) {
+      if (!currentUser) return;
+      const pizza = PIZZAS.find(p => p.id === pizzaId);
+      if (!pizza) return;
+
+      // Добавляем деньги
+      currentUser.balance += pizza.price;
+      
+      // Добавляем в инвентарь
+      if (!currentUser.inventory[pizzaId]) {
+        currentUser.inventory[pizzaId] = 1;
+      } else {
+        currentUser.inventory[pizzaId] += 1;
+      }
+
+      updateBalanceUI();
+      renderInventory();
+      persistCurrentUser();
+      showToast(`🍕 ${pizza.name} доставлена! +${pizza.price} 💰`, true);
+      
+      // Вибро
+      if (navigator.vibrate) navigator.vibrate(20);
+    }
+
+    // Быстрый заработок +100
+    function quickEarn() {
+      if (!currentUser) return;
+      currentUser.balance += 100;
+      updateBalanceUI();
+      persistCurrentUser();
+      showToast(`⚡ Быстрый заказ +100`, true);
+      if (navigator.vibrate) navigator.vibrate(15);
+    }
+
+    // Вход пользователя
+    function loginUser(login, password) {
+      if (!login || !password) {
+        authError.textContent = 'Введите логин и пароль';
+        return;
+      }
+      const userRecord = usersDB[login];
+      if (!userRecord) {
+        authError.textContent = 'Пользователь не найден';
+        return;
+      }
+      if (userRecord.password !== password) {
+        authError.textContent = 'Неверный пароль';
+        return;
+      }
+      
+      // Загружаем данные
+      currentUser = {
+        login: login,
+        balance: userRecord.balance ?? 250, // стартовый баланс если нет
+        inventory: userRecord.inventory ? { ...userRecord.inventory } : {}
+      };
+      
+      // Обновить UI
+      usernameDisplay.textContent = login;
+      updateBalanceUI();
+      renderInventory();
+      renderPizzaCards();
+      
+      authSection.style.display = 'none';
+      mainInterface.classList.add('active');
+      authError.textContent = '';
+      loginInput.value = '';
+      passwordInput.value = '';
+      showToast(`👋 С возвращением, ${login}!`, true);
+    }
+
+    // Регистрация
+    function registerUser(login, password) {
+      if (!login || !password) {
+        authError.textContent = 'Заполните все поля';
+        return;
+      }
+      if (usersDB[login]) {
+        authError.textContent = 'Логин уже занят';
+        return;
+      }
+      // Создаём
+      const newUser = {
+        password: password,
+        balance: 250,      // стартовый капитал
+        inventory: {}
+      };
+      usersDB[login] = newUser;
+      saveUsersDB();
+      
+      // Автоматический вход
+      currentUser = {
+        login: login,
+        balance: 250,
+        inventory: {}
+      };
+      
+      usernameDisplay.textContent = login;
+      updateBalanceUI();
+      renderInventory();
+      renderPizzaCards();
+      
+      authSection.style.display = 'none';
+      mainInterface.classList.add('active');
+      authError.textContent = '';
+      loginInput.value = '';
+      passwordInput.value = '';
+      showToast(`🎉 Аккаунт создан! Добро пожаловать, ${login}!`, true);
+    }
+
+    // Выход
+    function logout() {
+      if (currentUser) {
+        persistCurrentUser(); // финальное сохранение
+      }
+      currentUser = null;
+      mainInterface.classList.remove('active');
+      authSection.style.display = 'flex';
+      showToast('Вы вышли из системы', true);
+    }
+
+    // Инициализация после загрузки
+    function initApp() {
+      loadUsersDB();
+      
+      // Если есть активная сессия? не храним, всегда начинаем с авторизации.
+      authSection.style.display = 'flex';
+      mainInterface.classList.remove('active');
+      
+      // Обработчики
+      loginBtn.addEventListener('click', () => {
+        loginUser(loginInput.value.trim(), passwordInput.value);
+      });
+      registerBtn.addEventListener('click', () => {
+        registerUser(loginInput.value.trim(), passwordInput.value);
+      });
+      
+      logoutBtn.addEventListener('click', logout);
+      
+      quickEarnBtn.addEventListener('click', quickEarn);
+      
+      // Enter по паролю
+      passwordInput.addEventListener('keypress', (e) => {
+        if(e.key === 'Enter') loginUser(loginInput.value.trim(), passwordInput.value);
+      });
+      loginInput.addEventListener('keypress', (e) => {
+        if(e.key === 'Enter') loginUser(loginInput.value.trim(), passwordInput.value);
+      });
+    }
+
+    initApp();
+  })();
+</script>
+</body>
+</html>
