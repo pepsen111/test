@@ -1,248 +1,464 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-<meta charset="UTF-8">
-<title>Pizza Simulator PRO</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🍕 Pizza Express · Симулятор доставки</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', 'Inter', system-ui, sans-serif;
+    }
 
-<style>
-body {
-    margin: 0;
-    font-family: 'Segoe UI', sans-serif;
-    color: white;
-    text-align: center;
-    overflow-x: hidden;
-    background: radial-gradient(circle at top, #ff7e5f, #1a1a2e);
-}
+    body {
+      min-height: 100vh;
+      background: linear-gradient(145deg, #fff7e6 0%, #feeac9 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      margin: 0;
+    }
 
-/* движущийся фон */
-body::before {
-    content: "";
-    position: fixed;
-    width: 200%;
-    height: 200%;
-    background: radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px);
-    background-size: 50px 50px;
-    animation: moveBg 20s linear infinite;
-    z-index: -1;
-}
+    /* главная карточка */
+    .game-container {
+      max-width: 900px;
+      width: 100%;
+      background: rgba(255, 255, 255, 0.7);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-radius: 48px;
+      box-shadow: 0 25px 40px -10px rgba(0, 0, 0, 0.2), 0 8px 20px rgba(206, 92, 0, 0.08);
+      padding: 28px 30px 35px;
+      border: 1px solid rgba(255, 215, 150, 0.5);
+      transition: transform 0.2s ease;
+    }
 
-@keyframes moveBg {
-    from { transform: translate(0,0); }
-    to { transform: translate(-200px,-200px); }
-}
+    .game-container:hover {
+      transform: scale(1.002);
+    }
 
-button {
-    padding: 10px 15px;
-    border-radius: 10px;
-    border: none;
-    cursor: pointer;
-    margin: 5px;
-    background: white;
-    color: #ff5e62;
-    transition: 0.3s;
-}
+    /* шапка с балансом */
+    .wallet-section {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #1e1e2a;
+      padding: 18px 28px;
+      border-radius: 120px;
+      margin-bottom: 30px;
+      box-shadow: 0 12px 0 #0b0b10, 0 8px 20px rgba(0,0,0,0.2);
+      border: 1px solid #ffb55a;
+    }
 
-button:hover {
-    transform: scale(1.1);
-}
+    .wallet-info {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
 
-.container {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-}
+    .wallet-icon {
+      font-size: 36px;
+      filter: drop-shadow(0 4px 4px rgba(0,0,0,0.3));
+    }
 
-.card {
-    background: rgba(255,255,255,0.15);
-    backdrop-filter: blur(10px);
-    border-radius: 15px;
-    padding: 15px;
-    margin: 10px;
-    width: 180px;
-}
+    .balance-display {
+      color: #ffd78c;
+      font-weight: 800;
+      font-size: 2.6rem;
+      letter-spacing: 1px;
+      text-shadow: 0 3px 0 #7a3e00;
+    }
 
-h1 { margin-top: 20px; }
-</style>
+    .balance-label {
+      color: #b9b9d6;
+      font-weight: 500;
+      font-size: 1rem;
+      margin-left: 6px;
+    }
+
+    /* кнопка дохода */
+    .earn-button {
+      background: radial-gradient(circle at 20% 20%, #ffb347, #ff8c00);
+      border: none;
+      color: #1e1e2a;
+      font-weight: 800;
+      font-size: 1.4rem;
+      padding: 14px 32px;
+      border-radius: 60px;
+      cursor: pointer;
+      box-shadow: 0 8px 0 #b45f00, 0 6px 16px rgba(255, 140, 0, 0.5);
+      border: 1px solid #ffe694;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      transition: all 0.07s cubic-bezier(0.2, 1.6, 0.5, 1);
+      letter-spacing: 0.5px;
+      transform: translateY(0);
+    }
+
+    .earn-button:active {
+      transform: translateY(5px);
+      box-shadow: 0 3px 0 #b45f00, 0 6px 16px rgba(255, 140, 0, 0.5);
+    }
+
+    .earn-button:hover {
+      background: radial-gradient(circle at 30% 30%, #ffc470, #ff9f1a);
+      box-shadow: 0 8px 0 #b45f00, 0 10px 20px rgba(255, 140, 0, 0.6);
+    }
+
+    .earn-emoji {
+      font-size: 28px;
+      filter: drop-shadow(0 2px 2px black);
+    }
+
+    /* сетка пицц */
+    .pizza-menu {
+      margin: 30px 0 18px;
+    }
+
+    .section-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 18px;
+      color: #3d2a1a;
+      font-weight: 700;
+      font-size: 1.8rem;
+      text-shadow: 2px 2px 0 #ffe0b3;
+    }
+
+    .pizza-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+      gap: 16px;
+    }
+
+    /* карточка пиццы */
+    .pizza-card {
+      background: white;
+      border-radius: 28px;
+      padding: 18px 10px 14px;
+      box-shadow: 0 12px 0 #a05f2c, 0 10px 20px -5px rgba(100, 50, 10, 0.2);
+      border: 1px solid #ffddbb;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      transition: all 0.25s ease;
+      cursor: pointer;
+      transform: translateY(0);
+      animation: card-float 4s infinite alternate ease-in-out;
+    }
+
+    /* разная задержка анимации для живости */
+    .pizza-card:nth-child(1) { animation-delay: 0s; }
+    .pizza-card:nth-child(2) { animation-delay: 0.4s; }
+    .pizza-card:nth-child(3) { animation-delay: 0.2s; }
+    .pizza-card:nth-child(4) { animation-delay: 0.6s; }
+    .pizza-card:nth-child(5) { animation-delay: 0.1s; }
+
+    @keyframes card-float {
+      0% { transform: translateY(0px); }
+      100% { transform: translateY(-6px); }
+    }
+
+    .pizza-card:hover {
+      box-shadow: 0 8px 0 #a05f2c, 0 18px 28px -8px #cc7f3a;
+      transform: translateY(-2px) scale(1.02);
+      background: #fffbf5;
+      border-color: #ffb26e;
+      animation-play-state: paused;
+    }
+
+    .pizza-card:active {
+      transform: translateY(5px);
+      box-shadow: 0 4px 0 #7a421e, 0 10px 18px -5px #b45f2e;
+    }
+
+    .pizza-emoji {
+      font-size: 64px;
+      margin-bottom: 8px;
+      filter: drop-shadow(0 8px 8px rgba(0,0,0,0.15));
+      transition: transform 0.2s;
+    }
+
+    .pizza-card:hover .pizza-emoji {
+      transform: rotate(3deg) scale(1.1);
+    }
+
+    .pizza-name {
+      font-weight: 800;
+      font-size: 1.25rem;
+      color: #2d1c0c;
+      margin-bottom: 8px;
+    }
+
+    .pizza-price {
+      background: #4a3620;
+      padding: 6px 18px;
+      border-radius: 40px;
+      color: #ffe6b3;
+      font-weight: 700;
+      font-size: 1.2rem;
+      box-shadow: inset 0 2px 4px rgba(0,0,0,0.2), 0 3px 0 #1f150a;
+      border-bottom: 1px solid #aa7942;
+      margin: 6px 0 12px;
+    }
+
+    .buy-indicator {
+      font-size: 1rem;
+      background: #ffeedb;
+      padding: 5px 12px;
+      border-radius: 30px;
+      color: #5a3e25;
+      font-weight: 600;
+      width: fit-content;
+      margin: 0 auto;
+      border: 1px solid #efc48c;
+      transition: background 0.2s;
+    }
+
+    /* панель действий доставки */
+    .delivery-panel {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 30px;
+      background: #ffe1b9;
+      border-radius: 60px;
+      padding: 8px 8px 8px 24px;
+      border: 2px dashed #c97f2e;
+    }
+
+    .delivery-message {
+      font-weight: 600;
+      color: #412d1a;
+      font-size: 1.1rem;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .deliver-btn {
+      background: #c7512c;
+      border: none;
+      color: white;
+      font-weight: 700;
+      font-size: 1.2rem;
+      padding: 14px 32px;
+      border-radius: 50px;
+      box-shadow: 0 6px 0 #732e18, 0 4px 12px rgba(190, 70, 20, 0.3);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      transition: 0.07s;
+      transform: translateY(0);
+      border: 1px solid #ffb28b;
+    }
+
+    .deliver-btn:active {
+      transform: translateY(4px);
+      box-shadow: 0 2px 0 #732e18, 0 4px 12px #a04020;
+    }
+
+    .deliver-btn:disabled {
+      opacity: 0.5;
+      transform: none;
+      box-shadow: 0 4px 0 #732e18;
+      pointer-events: none;
+      filter: grayscale(0.3);
+    }
+
+    /* уведомление (тост-анимация) */
+    .notification-toast {
+      position: fixed;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #1e1e2a;
+      color: #ffd966;
+      padding: 16px 32px;
+      border-radius: 60px;
+      font-weight: 700;
+      font-size: 1.3rem;
+      box-shadow: 0 20px 30px -5px black;
+      border-left: 8px solid #ffa726;
+      z-index: 999;
+      opacity: 0;
+      transition: opacity 0.25s ease, transform 0.3s ease;
+      pointer-events: none;
+      white-space: nowrap;
+    }
+
+    .notification-toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(-10px);
+      pointer-events: none;
+    }
+
+    .reset-area {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: 10px;
+    }
+
+    .reset-link {
+      color: #8b5e2e;
+      font-weight: 500;
+      text-decoration: underline dotted;
+      cursor: pointer;
+      font-size: 0.9rem;
+      opacity: 0.7;
+    }
+
+    .reset-link:hover {
+      opacity: 1;
+    }
+
+    /* анимация смены цифр */
+    .balance-display {
+      transition: color 0.1s;
+    }
+
+    .glow-text {
+      text-shadow: 0 0 10px #ffb142;
+    }
+  </style>
 </head>
-
 <body>
+<div class="game-container">
+  <!-- Верхняя панель: баланс + кнопка заработка -->
+  <div class="wallet-section">
+    <div class="wallet-info">
+      <span class="wallet-icon">👛</span>
+      <span class="balance-display" id="balanceValue">250</span>
+      <span class="balance-label">₽</span>
+    </div>
+    <button class="earn-button" id="earnBtn">
+      <span class="earn-emoji">🛵💨</span>
+      <span>+100</span>
+    </button>
+  </div>
 
-<div id="auth">
-    <h2>Вход</h2>
-    <input id="login" placeholder="логин"><br>
-    <input id="password" type="password" placeholder="пароль"><br>
-    <button onclick="register()">Регистрация</button>
-    <button onclick="loginUser()">Войти</button>
+  <!-- Меню из 5 пицц -->
+  <div class="pizza-menu">
+    <div class="section-title">
+      <span>🍕 МЕНЮ</span>
+      <span>⭐</span>
+    </div>
+    <div class="pizza-grid" id="pizzaGrid"></div>
+  </div>
+
+  <!-- Блок доставки -->
+  <div class="delivery-panel">
+    <div class="delivery-message">
+      <span>📦</span>
+      <span id="deliveryStatus">Выберите пиццу</span>
+    </div>
+    <button class="deliver-btn" id="deliverOrderBtn">
+      <span>🚚</span>
+      <span>Доставить</span>
+    </button>
+  </div>
+
+  <!-- скрытый сброс (опционально) -->
+  <div class="reset-area">
+    <span class="reset-link" id="resetGame">🔄 Сбросить прогресс</span>
+  </div>
 </div>
 
-<div id="game" style="display:none;">
-    <h1>🍕 Pizza Simulator PRO</h1>
-    <div id="wallet"></div>
-    <button onclick="addMoney()">+клик</button>
-
-    <h2>🍕 Магазин пиццы</h2>
-    <div id="shop" class="container"></div>
-
-    <h2>🎒 Инвентарь</h2>
-    <div id="inventory" class="container"></div>
-
-    <h2>🪙 Магазин улучшений</h2>
-    <div id="upgradeShop" class="container"></div>
-
-    <h2>👦 Толстый мальчик</h2>
-    <button onclick="feedBoy()">Покормить</button>
-</div>
+<!-- Уведомление (всплывашка) -->
+<div class="notification-toast" id="notification"></div>
 
 <script>
-// ===== ЗВУКИ =====
-function playClick() {
-    new Audio("https://cdn.pixabay.com/download/audio/2022/03/15/audio_click.mp3").play();
-}
-function playBuy() {
-    new Audio("https://cdn.pixabay.com/download/audio/2022/03/15/audio_success.mp3").play();
-}
+  (function(){
+    "use strict";
 
-// ===== ДАННЫЕ =====
-let balance = 0;
-let coins = 0;
-let inventory = [];
-let currentUser;
+    // ---------- СОСТОЯНИЕ ----------
+    const pizzas = [
+      { id: 0, name: 'Маргарита',   emoji: '🍕🧀', price: 120 },
+      { id: 1, name: 'с грибами',   emoji: '🍕🍄', price: 140 },
+      { id: 2, name: 'с ананасами', emoji: '🍕🍍', price: 150 },
+      { id: 3, name: 'Пепперони',   emoji: '🍕🌶️', price: 160 },
+      { id: 4, name: 'Четыре сыра', emoji: '🧀🧀🧀', price: 180 }
+    ];
 
-let clickMultiplier = 1;
-let coinMultiplier = 1;
-let discount = false;
+    // начальные данные
+    let balance = 250;                // стартовый баланс
+    let selectedPizzaId = null;       // id выбранной пиццы
+    let orderCount = 0;              // просто счетчик для анимаций
 
-const pizzas = [
-    {name:"Маргарита", price:120},
-    {name:"Грибы", price:150},
-    {name:"Ананасы", price:170},
-    {name:"Пепперони", price:200},
-    {name:"4 сыра", price:220}
-];
+    // DOM элементы
+    const balanceEl = document.getElementById('balanceValue');
+    const pizzaGrid = document.getElementById('pizzaGrid');
+    const deliveryStatus = document.getElementById('deliveryStatus');
+    const deliverBtn = document.getElementById('deliverOrderBtn');
+    const earnBtn = document.getElementById('earnBtn');
+    const notification = document.getElementById('notification');
+    const resetBtn = document.getElementById('resetGame');
 
-const upgrades = [
-    {name:"Скидка 35%", cost:500, action:() => discount=true},
-    {name:"x2 деньги", cost:300, action:() => clickMultiplier*=2},
-    {name:"x2 коины", cost:400, action:() => coinMultiplier*=2}
-];
-
-// ===== AUTH =====
-function register(){
-    localStorage.setItem(login.value, JSON.stringify({
-        password: password.value,
-        balance:0, coins:0, inventory:[],
-        clickMultiplier:1, coinMultiplier:1, discount:false
-    }));
-    alert("OK");
-}
-
-function loginUser(){
-    let u = JSON.parse(localStorage.getItem(login.value));
-    if(!u || u.password !== password.value) return alert("Ошибка");
-
-    currentUser = login.value;
-    Object.assign(window, u);
-
-    auth.style.display="none";
-    game.style.display="block";
-
-    renderAll();
-}
-
-// ===== SAVE =====
-function save(){
-    localStorage.setItem(currentUser, JSON.stringify({
-        password: JSON.parse(localStorage.getItem(currentUser)).password,
-        balance, coins, inventory,
-        clickMultiplier, coinMultiplier, discount
-    }));
-}
-
-// ===== UI =====
-function updateUI(){
-    wallet.innerText =
-    `Баланс: ${balance} | Coins: ${coins} | x$${clickMultiplier}`;
-}
-
-// ===== GAME =====
-function addMoney(){
-    playClick();
-    balance += 100 * clickMultiplier;
-    updateUI(); save();
-}
-
-function buyPizza(p){
-    let price = discount ? Math.floor(p.price*0.65) : p.price;
-
-    if(balance>=price){
-        balance -= price;
-        inventory.push(p.name);
-        discount = false;
-        playBuy();
-        renderInventory();
-        updateUI(); save();
+    // ---------- ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ----------
+    function formatBalance(value) {
+      return value.toString();
     }
-}
 
-function feedBoy(){
-    if(!inventory.length) return;
-
-    inventory.pop();
-    coins += 1 * coinMultiplier;
-    playBuy();
-    renderInventory();
-    updateUI(); save();
-}
-
-// ===== UPGRADE SHOP =====
-function buyUpgrade(u){
-    if(coins>=u.cost){
-        coins -= u.cost;
-        u.action();
-        playBuy();
-        updateUI(); save();
+    // Обновить отображение баланса с анимацией мерцания
+    function updateBalanceDisplay() {
+      balanceEl.textContent = formatBalance(balance);
+      // лёгкая вспышка
+      balanceEl.classList.add('glow-text');
+      setTimeout(() => balanceEl.classList.remove('glow-text'), 150);
     }
-}
 
-// ===== RENDER =====
-function renderShop(){
-    shop.innerHTML="";
-    pizzas.forEach(p=>{
-        shop.innerHTML += `
-        <div class="card">
-            <h3>${p.name}</h3>
-            <p>${p.price}</p>
-            <button onclick='buyPizza(${JSON.stringify(p)})'>Купить</button>
-        </div>`;
-    });
-}
+    // Показать всплывающее уведомление
+    function showToast(text, isGood = true) {
+      notification.textContent = text;
+      notification.style.background = isGood ? '#1e1e2a' : '#4a2020';
+      notification.style.borderLeftColor = isGood ? '#ffa726' : '#ff6b6b';
+      notification.classList.add('show');
+      setTimeout(() => {
+        notification.classList.remove('show');
+      }, 1800);
+    }
 
-function renderInventory(){
-    inventory.innerHTML="";
-    inventory.forEach(i=>{
-        inventory.innerHTML += `<div class="card">${i}</div>`;
-    });
-}
+    // Проверка, можно ли купить пиццу
+    function canAfford(pizzaPrice) {
+      return balance >= pizzaPrice;
+    }
 
-function renderUpgrades(){
-    upgradeShop.innerHTML="";
-    upgrades.forEach(u=>{
-        upgradeShop.innerHTML += `
-        <div class="card">
-            <h3>${u.name}</h3>
-            <p>${u.cost} coins</p>
-            <button onclick='buyUpgrade(upgrades[${upgrades.indexOf(u)}])'>Купить</button>
-        </div>`;
-    });
-}
+    // Обработчик покупки (выбор пиццы)
+    function handlePizzaClick(pizza) {
+      if (!canAfford(pizza.price)) {
+        showToast(`❌ Не хватает на "${pizza.name}"! Нужно ${pizza.price}₽`, false);
+        // анимация тряски? просто визуал
+        return;
+      }
 
-function renderAll(){
-    renderShop();
-    renderInventory();
-    renderUpgrades();
-    updateUI();
-}
-</script>
+      // Списываем деньги
+      balance -= pizza.price;
+      selectedPizzaId = pizza.id;
+      orderCount++;
 
-</body>
-</html>
+      // Обновляем UI
+      updateBalanceDisplay();
+      updateDeliveryUI();
+      
+      // Анимация выбора: показываем тост
+      showToast(`✅ Выбрана: ${pizza.name} · -${pizza.price}₽`, true);
+
+      // перерисовываем карточки (чтобы обновить disabled-стиль если надо, хотя лучше просто ререндер)
+      renderPizzaCards();
+      
+      // доп. микроанимация на статус
+      deliveryStatus.style.transform = 'scale(1.05)';
+      setTimeout(() => deliveryStatus.style.transform = '', 120);
+    }
+
+    // Обновить текст статуса и кнопку доставки
+    function updateDeliveryUI() {
+      if (selectedPizzaId !== null) {
+        const pizza = pizzas.find(p => p.id === selected
