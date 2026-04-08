@@ -2,46 +2,41 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<title>Pizza Simulator</title>
+<title>Pizza Simulator PRO</title>
+
 <style>
 body {
     margin: 0;
     font-family: 'Segoe UI', sans-serif;
-    background: linear-gradient(135deg, #ff7e5f, #feb47b);
     color: white;
     text-align: center;
+    overflow-x: hidden;
+    background: radial-gradient(circle at top, #ff7e5f, #1a1a2e);
 }
 
-/* Анимации */
-@keyframes fadeIn {
-    from {opacity:0; transform: translateY(20px);}
-    to {opacity:1; transform: translateY(0);}
+/* движущийся фон */
+body::before {
+    content: "";
+    position: fixed;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px);
+    background-size: 50px 50px;
+    animation: moveBg 20s linear infinite;
+    z-index: -1;
 }
 
-@keyframes pulse {
-    0% {transform: scale(1);}
-    50% {transform: scale(1.1);}
-    100% {transform: scale(1);}
-}
-
-/* Авторизация */
-#auth {
-    margin-top: 100px;
-    animation: fadeIn 1s;
-}
-
-input {
-    padding: 10px;
-    margin: 5px;
-    border-radius: 10px;
-    border: none;
+@keyframes moveBg {
+    from { transform: translate(0,0); }
+    to { transform: translate(-200px,-200px); }
 }
 
 button {
-    padding: 10px 20px;
-    border: none;
+    padding: 10px 15px;
     border-radius: 10px;
+    border: none;
     cursor: pointer;
+    margin: 5px;
     background: white;
     color: #ff5e62;
     transition: 0.3s;
@@ -51,225 +46,201 @@ button:hover {
     transform: scale(1.1);
 }
 
-/* Основной интерфейс */
-#game {
-    display: none;
-    animation: fadeIn 1s;
-}
-
 .container {
     display: flex;
-    justify-content: center;
     flex-wrap: wrap;
+    justify-content: center;
 }
 
 .card {
-    background: rgba(255,255,255,0.2);
+    background: rgba(255,255,255,0.15);
     backdrop-filter: blur(10px);
     border-radius: 15px;
     padding: 15px;
     margin: 10px;
     width: 180px;
-    animation: fadeIn 0.5s;
 }
 
-.card:hover {
-    transform: translateY(-5px);
-}
-
-.inventory {
-    margin-top: 20px;
-}
-
-.boy {
-    margin-top: 30px;
-    font-size: 24px;
-    animation: pulse 2s infinite;
-}
-
-.msg {
-    position: fixed;
-    bottom: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-    background: #4caf50;
-    padding: 10px 20px;
-    border-radius: 10px;
-}
+h1 { margin-top: 20px; }
 </style>
 </head>
+
 <body>
 
 <div id="auth">
-    <h2>🔐 Вход / Регистрация</h2>
-    <input id="login" placeholder="Логин"><br>
-    <input id="password" type="password" placeholder="Пароль"><br>
+    <h2>Вход</h2>
+    <input id="login" placeholder="логин"><br>
+    <input id="password" type="password" placeholder="пароль"><br>
     <button onclick="register()">Регистрация</button>
     <button onclick="loginUser()">Войти</button>
 </div>
 
-<div id="game">
-    <h1>🍕 Pizza Simulator</h1>
-    <div id="wallet">Баланс: 0</div>
-    <button onclick="addMoney()">+100</button>
+<div id="game" style="display:none;">
+    <h1>🍕 Pizza Simulator PRO</h1>
+    <div id="wallet"></div>
+    <button onclick="addMoney()">+клик</button>
 
-    <div class="container" id="shop"></div>
+    <h2>🍕 Магазин пиццы</h2>
+    <div id="shop" class="container"></div>
 
     <h2>🎒 Инвентарь</h2>
-    <div class="container inventory" id="inventory"></div>
+    <div id="inventory" class="container"></div>
 
-    <div class="boy">
-        👦 Толстый мальчик хочет пиццу!
-        <br><button onclick="feedBoy()">Покормить</button>
-    </div>
+    <h2>🪙 Магазин улучшений</h2>
+    <div id="upgradeShop" class="container"></div>
+
+    <h2>👦 Толстый мальчик</h2>
+    <button onclick="feedBoy()">Покормить</button>
 </div>
 
 <script>
+// ===== ЗВУКИ =====
+function playClick() {
+    new Audio("https://cdn.pixabay.com/download/audio/2022/03/15/audio_click.mp3").play();
+}
+function playBuy() {
+    new Audio("https://cdn.pixabay.com/download/audio/2022/03/15/audio_success.mp3").play();
+}
+
+// ===== ДАННЫЕ =====
 let balance = 0;
 let coins = 0;
 let inventory = [];
-let currentUser = null;
+let currentUser;
+
+let clickMultiplier = 1;
+let coinMultiplier = 1;
+let discount = false;
 
 const pizzas = [
-    {name: "Маргарита", price: 120},
-    {name: "С грибами", price: 150},
-    {name: "С ананасами", price: 170},
-    {name: "Пепперони", price: 200},
-    {name: "Четыре сыра", price: 220}
+    {name:"Маргарита", price:120},
+    {name:"Грибы", price:150},
+    {name:"Ананасы", price:170},
+    {name:"Пепперони", price:200},
+    {name:"4 сыра", price:220}
+];
+
+const upgrades = [
+    {name:"Скидка 35%", cost:500, action:() => discount=true},
+    {name:"x2 деньги", cost:300, action:() => clickMultiplier*=2},
+    {name:"x2 коины", cost:400, action:() => coinMultiplier*=2}
 ];
 
 // ===== AUTH =====
-function register() {
-    const login = document.getElementById("login").value;
-    const password = document.getElementById("password").value;
-
-    if (!login || !password) return alert("Заполни поля");
-
-    localStorage.setItem(login, JSON.stringify({
-        password,
-        balance: 0,
-        coins: 0,
-        inventory: []
+function register(){
+    localStorage.setItem(login.value, JSON.stringify({
+        password: password.value,
+        balance:0, coins:0, inventory:[],
+        clickMultiplier:1, coinMultiplier:1, discount:false
     }));
-
-    alert("Зарегистрирован!");
+    alert("OK");
 }
 
-function loginUser() {
-    const login = document.getElementById("login").value;
-    const password = document.getElementById("password").value;
+function loginUser(){
+    let u = JSON.parse(localStorage.getItem(login.value));
+    if(!u || u.password !== password.value) return alert("Ошибка");
 
-    const user = JSON.parse(localStorage.getItem(login));
+    currentUser = login.value;
+    Object.assign(window, u);
 
-    if (!user || user.password !== password) {
-        alert("Ошибка входа");
-        return;
-    }
+    auth.style.display="none";
+    game.style.display="block";
 
-    currentUser = login;
-    balance = user.balance;
-    coins = user.coins;
-    inventory = user.inventory;
+    renderAll();
+}
 
-    document.getElementById("auth").style.display = "none";
-    document.getElementById("game").style.display = "block";
+// ===== SAVE =====
+function save(){
+    localStorage.setItem(currentUser, JSON.stringify({
+        password: JSON.parse(localStorage.getItem(currentUser)).password,
+        balance, coins, inventory,
+        clickMultiplier, coinMultiplier, discount
+    }));
+}
 
-    renderShop();
-    renderInventory();
-    updateUI();
+// ===== UI =====
+function updateUI(){
+    wallet.innerText =
+    `Баланс: ${balance} | Coins: ${coins} | x$${clickMultiplier}`;
 }
 
 // ===== GAME =====
-function save() {
-    localStorage.setItem(currentUser, JSON.stringify({
-        password: JSON.parse(localStorage.getItem(currentUser)).password,
-        balance,
-        coins,
-        inventory
-    }));
+function addMoney(){
+    playClick();
+    balance += 100 * clickMultiplier;
+    updateUI(); save();
 }
 
-function updateUI() {
-    document.getElementById("wallet").innerText =
-        "Баланс: " + balance + " | Coins: " + coins;
-}
+function buyPizza(p){
+    let price = discount ? Math.floor(p.price*0.65) : p.price;
 
-function addMoney() {
-    balance += 100;
-    updateUI();
-    save();
-}
-
-function buyPizza(pizza) {
-    if (balance >= pizza.price) {
-        balance -= pizza.price;
-        inventory.push(pizza.name);
+    if(balance>=price){
+        balance -= price;
+        inventory.push(p.name);
+        discount = false;
+        playBuy();
         renderInventory();
-        updateUI();
-        save();
-        showMsg("Куплена " + pizza.name);
-    } else {
-        showMsg("Нет денег!");
+        updateUI(); save();
     }
 }
 
-function renderShop() {
-    const shop = document.getElementById("shop");
-    shop.innerHTML = "";
+function feedBoy(){
+    if(!inventory.length) return;
 
-    pizzas.forEach(p => {
-        const div = document.createElement("div");
-        div.className = "card";
-        div.innerHTML = `
+    inventory.pop();
+    coins += 1 * coinMultiplier;
+    playBuy();
+    renderInventory();
+    updateUI(); save();
+}
+
+// ===== UPGRADE SHOP =====
+function buyUpgrade(u){
+    if(coins>=u.cost){
+        coins -= u.cost;
+        u.action();
+        playBuy();
+        updateUI(); save();
+    }
+}
+
+// ===== RENDER =====
+function renderShop(){
+    shop.innerHTML="";
+    pizzas.forEach(p=>{
+        shop.innerHTML += `
+        <div class="card">
             <h3>${p.name}</h3>
             <p>${p.price}</p>
             <button onclick='buyPizza(${JSON.stringify(p)})'>Купить</button>
-        `;
-        shop.appendChild(div);
+        </div>`;
     });
 }
 
-function renderInventory() {
-    const inv = document.getElementById("inventory");
-    inv.innerHTML = "";
-
-    inventory.forEach((item, index) => {
-        const div = document.createElement("div");
-        div.className = "card";
-        div.innerHTML = `
-            <p>${item}</p>
-            <button onclick="removePizza(${index})">Удалить</button>
-        `;
-        inv.appendChild(div);
+function renderInventory(){
+    inventory.innerHTML="";
+    inventory.forEach(i=>{
+        inventory.innerHTML += `<div class="card">${i}</div>`;
     });
 }
 
-function removePizza(i) {
-    inventory.splice(i, 1);
-    renderInventory();
-    save();
+function renderUpgrades(){
+    upgradeShop.innerHTML="";
+    upgrades.forEach(u=>{
+        upgradeShop.innerHTML += `
+        <div class="card">
+            <h3>${u.name}</h3>
+            <p>${u.cost} coins</p>
+            <button onclick='buyUpgrade(upgrades[${upgrades.indexOf(u)}])'>Купить</button>
+        </div>`;
+    });
 }
 
-function feedBoy() {
-    if (inventory.length === 0) {
-        showMsg("Нет пиццы!");
-        return;
-    }
-
-    inventory.pop();
-    coins += 1;
+function renderAll(){
+    renderShop();
     renderInventory();
+    renderUpgrades();
     updateUI();
-    save();
-    showMsg("Мальчик доволен! +1 coin");
-}
-
-function showMsg(text) {
-    const m = document.createElement("div");
-    m.className = "msg";
-    m.innerText = text;
-    document.body.appendChild(m);
-    setTimeout(()=>m.remove(), 2000);
 }
 </script>
 
