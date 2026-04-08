@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-  <title>🍕 PIZZA DELIVERY · ИНВЕНТАРЬ & АВТОРИЗАЦИЯ</title>
+  <title>🍕 PIZZA DELIVERY · СЕССИЯ & УЛЬТРА ЦЕНЫ</title>
   <!-- Шрифты -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -528,7 +528,7 @@
         </div>
       </div>
     </div>
-    <div style="margin-top: 20px; text-align: right; opacity: 0.8;">🛵 версия 2.0 · доставка + коллекция</div>
+    <div style="margin-top: 20px; text-align: right; opacity: 0.8;">🛵 версия 3.0 · сессия + ультра-цены</div>
   </div>
 </div>
 
@@ -539,17 +539,17 @@
   (function(){
     "use strict";
 
-    // ---------- КОНФИГУРАЦИЯ ПИЦЦ (дороже) ----------
+    // ---------- КОНФИГУРАЦИЯ ПИЦЦ (ЕЩЁ ДОРОЖЕ) ----------
     const PIZZAS = [
-      { id: 'marg', name: 'Маргарита', emoji: '🍕🧀', price: 180, baseEmoji: '🍅' },
-      { id: 'mush', name: 'С грибами', emoji: '🍄🍕', price: 240, baseEmoji: '🍄' },
-      { id: 'pine', name: 'С ананасами', emoji: '🍍🍕', price: 300, baseEmoji: '🍍' },
-      { id: 'pep', name: 'Пепперони', emoji: '🍕🔥', price: 350, baseEmoji: '🌶️' },
-      { id: '4cheese', name: 'Четыре сыра', emoji: '🧀🧀', price: 420, baseEmoji: '🧀' }
+      { id: 'marg', name: 'Маргарита', emoji: '🍕🧀', price: 500, baseEmoji: '🍅' },
+      { id: 'mush', name: 'С грибами', emoji: '🍄🍕', price: 700, baseEmoji: '🍄' },
+      { id: 'pine', name: 'С ананасами', emoji: '🍍🍕', price: 900, baseEmoji: '🍍' },
+      { id: 'pep', name: 'Пепперони', emoji: '🍕🔥', price: 1100, baseEmoji: '🌶️' },
+      { id: '4cheese', name: 'Четыре сыра', emoji: '🧀🧀', price: 1300, baseEmoji: '🧀' }
     ];
 
     // ---------- СОСТОЯНИЕ ПРИЛОЖЕНИЯ ----------
-    let currentUser = null;               // { login, balance, inventory: { pizzaId: count } }
+    let currentUser = null;               // { login, balance, inventory }
     let usersDB = {};                    // хранилище в localStorage
 
     // DOM элементы
@@ -592,15 +592,22 @@
       }
     }
 
-    // Сохранить данные текущего пользователя в БД
+    // Сохранить данные текущего пользователя в БД и сессию
     function persistCurrentUser() {
       if (!currentUser) return;
       usersDB[currentUser.login] = {
-        password: usersDB[currentUser.login]?.password || '', // пароль не трогаем
+        password: usersDB[currentUser.login]?.password || '',
         balance: currentUser.balance,
         inventory: { ...currentUser.inventory }
       };
       saveUsersDB();
+      // Сохраняем активную сессию
+      localStorage.setItem('pizzaActiveSession', currentUser.login);
+    }
+
+    // Очистить сессию
+    function clearSession() {
+      localStorage.removeItem('pizzaActiveSession');
     }
 
     // Обновить интерфейс баланса
@@ -651,7 +658,6 @@
         `;
         pizzaGrid.appendChild(card);
       });
-      // Навесить обработчики
       document.querySelectorAll('.deliver-btn').forEach(btn => {
         btn.addEventListener('click', (e) => {
           const pizzaId = btn.dataset.id;
@@ -666,10 +672,8 @@
       const pizza = PIZZAS.find(p => p.id === pizzaId);
       if (!pizza) return;
 
-      // Добавляем деньги
       currentUser.balance += pizza.price;
       
-      // Добавляем в инвентарь
       if (!currentUser.inventory[pizzaId]) {
         currentUser.inventory[pizzaId] = 1;
       } else {
@@ -680,8 +684,6 @@
       renderInventory();
       persistCurrentUser();
       showToast(`🍕 ${pizza.name} доставлена! +${pizza.price} 💰`, true);
-      
-      // Вибро
       if (navigator.vibrate) navigator.vibrate(20);
     }
 
@@ -693,6 +695,23 @@
       persistCurrentUser();
       showToast(`⚡ Быстрый заказ +100`, true);
       if (navigator.vibrate) navigator.vibrate(15);
+    }
+
+    // Загрузка пользователя и переключение интерфейса
+    function setActiveUser(userData, login) {
+      currentUser = {
+        login: login,
+        balance: userData.balance,
+        inventory: userData.inventory ? { ...userData.inventory } : {}
+      };
+      usernameDisplay.textContent = login;
+      updateBalanceUI();
+      renderInventory();
+      renderPizzaCards();
+      
+      authSection.style.display = 'none';
+      mainInterface.classList.add('active');
+      persistCurrentUser(); // обновит сессию
     }
 
     // Вход пользователя
@@ -711,21 +730,7 @@
         return;
       }
       
-      // Загружаем данные
-      currentUser = {
-        login: login,
-        balance: userRecord.balance ?? 250, // стартовый баланс если нет
-        inventory: userRecord.inventory ? { ...userRecord.inventory } : {}
-      };
-      
-      // Обновить UI
-      usernameDisplay.textContent = login;
-      updateBalanceUI();
-      renderInventory();
-      renderPizzaCards();
-      
-      authSection.style.display = 'none';
-      mainInterface.classList.add('active');
+      setActiveUser(userRecord, login);
       authError.textContent = '';
       loginInput.value = '';
       passwordInput.value = '';
@@ -742,29 +747,16 @@
         authError.textContent = 'Логин уже занят';
         return;
       }
-      // Создаём
+      // Стартовый баланс увеличен, чтобы можно было купить дорогие пиццы
       const newUser = {
         password: password,
-        balance: 250,      // стартовый капитал
+        balance: 800,
         inventory: {}
       };
       usersDB[login] = newUser;
       saveUsersDB();
       
-      // Автоматический вход
-      currentUser = {
-        login: login,
-        balance: 250,
-        inventory: {}
-      };
-      
-      usernameDisplay.textContent = login;
-      updateBalanceUI();
-      renderInventory();
-      renderPizzaCards();
-      
-      authSection.style.display = 'none';
-      mainInterface.classList.add('active');
+      setActiveUser(newUser, login);
       authError.textContent = '';
       loginInput.value = '';
       passwordInput.value = '';
@@ -774,21 +766,43 @@
     // Выход
     function logout() {
       if (currentUser) {
-        persistCurrentUser(); // финальное сохранение
+        persistCurrentUser();
       }
       currentUser = null;
       mainInterface.classList.remove('active');
       authSection.style.display = 'flex';
+      clearSession();
       showToast('Вы вышли из системы', true);
+    }
+
+    // Проверка сохранённой сессии
+    function tryAutoLogin() {
+      const savedLogin = localStorage.getItem('pizzaActiveSession');
+      if (!savedLogin) return false;
+      
+      const userRecord = usersDB[savedLogin];
+      if (!userRecord) {
+        clearSession();
+        return false;
+      }
+      
+      setActiveUser(userRecord, savedLogin);
+      showToast(`👤 Автовход: ${savedLogin}`, true);
+      return true;
     }
 
     // Инициализация после загрузки
     function initApp() {
       loadUsersDB();
       
-      // Если есть активная сессия? не храним, всегда начинаем с авторизации.
-      authSection.style.display = 'flex';
-      mainInterface.classList.remove('active');
+      const autoLogged = tryAutoLogin();
+      if (!autoLogged) {
+        authSection.style.display = 'flex';
+        mainInterface.classList.remove('active');
+      } else {
+        authSection.style.display = 'none';
+        mainInterface.classList.add('active');
+      }
       
       // Обработчики
       loginBtn.addEventListener('click', () => {
@@ -802,7 +816,6 @@
       
       quickEarnBtn.addEventListener('click', quickEarn);
       
-      // Enter по паролю
       passwordInput.addEventListener('keypress', (e) => {
         if(e.key === 'Enter') loginUser(loginInput.value.trim(), passwordInput.value);
       });
